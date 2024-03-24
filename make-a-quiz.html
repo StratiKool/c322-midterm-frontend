@@ -1,11 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
-<body>
-  
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="navbar.css">
+    <link rel="stylesheet" href="make-a-quiz.css">
+  </head>
+
+  <body>
+    <ul class="topnav">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="add-question.html">Add questions</a></li>
+      <li><a class="active" href="make-a-quiz.html">Create a quiz</a></li>
+      <li><a href="take-a-quiz.html">Take a quiz</a></li>
+      <li class="right"><a href="#about">About</a></li>
+    </ul>
+
+    <div class="questions">
+      <br>
+      <div class="question_bank_label">
+        <label>Questions Bank</label>
+      </div>
+      <br>
+      <div class="clicklabel">
+        <label>Click on a question to add it to the quiz</label>
+      </div>
+      <br>
+      <div id="img_container" class="cards"></div>
+
+    </div>
+
+    <div id="list"class="quiz">
+      <label id="newQuiz"></label>
+      <div id="tempCards"></div>
+    </div>
+
+   
+  </body>
+  <script>
+    let host = "http://localhost:8080"
+    let button = document.getElementById("animal");
+    let animals = [];
+    let questions = [];
+    let animalIds = [];
+    displayInTheBox();
+
+
+
+    async function getAll() {
+      let response = await fetch(host + "/questions");
+      let result = await response.json();
+      return result;
+    }
+    async function add(id){
+      animals.push(questions[id]);
+      if(id == 0){
+        questions.shift();
+      }else{
+        questions.splice(id, 1);
+      }
+      addAllBtns();
+    }
+
+    async function remove(id){
+      questions.splice(animals[0].id-1,0,animals[id]);
+      if(id == 0){
+        animals.shift();
+      }else{
+        animals.splice(id, 1);
+      }
+      addAllBtns(); 
+      
+
+    }
+
+    async function displayInTheBox(){
+      if(questions.length == 0){
+        questions = await getAll();
+      }
+      let imgContainer = document.getElementById("img_container");
+      imgContainer.innerHTML = "";
+
+      for(let question of questions){
+        let div = document.createElement("div");
+        div.className = "card";
+        let innerHtml = `
+         
+        <img src="http://localhost:8080/questions/${question.id}/image" alt="question" style="width:100%">
+        <div class="container">
+          <h4><b>${question.id}</b></h4> 
+          <p>${question.description}</p>
+          <form>
+              <input type="radio" id="q${question.id}ptionA" name="q2Answer" value="A">
+              <label for="q${question.id}ptionA">${question.choices[0]}</label><br>
+
+              <input type="radio" id="q${question.id}ptionB" name="q2Answer" value="B">
+              <label for="q${question.id}ptionB">${question.choices[1]}</label><br>
+
+              <input type="radio" id="q${question.id}ptionC" name="q2Answer" value="C">
+              <label for="q${question.id}ptionC">${question.choices[2]}</label><br>       
+          </form> 
+        </div>
+     
+            `;
+            div.innerHTML = innerHtml;
+            div.id = "animal"+question.id;
+            imgContainer.appendChild(div);
+            div.setAttribute("onclick", "add("+((question.id)-1)+")");
+      }
+
+    }
+
+
+    async function addAllBtns() {
+    document.getElementById("tempCards").innerHTML = ""; 
+
+    animalIds = []; 
+
+    for (let animal of animals) {
+        if (!animalIds.includes(animal.id)) {
+            animalIds.push(animal.id); 
+
+            console.log(animal.id);
+            let _button = document.createElement("button");
+            _button.innerHTML = document.getElementById("animal" + animal.id).innerHTML;
+            _button.setAttribute("onclick", "remove(" + animal.id + ")");
+            document.getElementById("tempCards").appendChild(_button);
+        }
+    }
+}
+
+  </script>
 </html>
