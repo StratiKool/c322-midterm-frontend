@@ -43,7 +43,6 @@
     let button = document.getElementById("animal");
     let animals = [];
     let questions = [];
-    let animalIds = [];
     displayInTheBox();
 
 
@@ -55,24 +54,18 @@
     }
     async function add(id){
       animals.push(questions[id]);
-      if(id == 0){
-        questions.shift();
-      }else{
-        questions.splice(id, 1);
-      }
+      console.log(animals);
+      console.log(questions);
+      questions.splice(id, 1);
       addAllBtns();
+      displayInTheBox();
     }
 
     async function remove(id){
-      questions.splice(animals[0].id-1,0,animals[id]);
-      if(id == 0){
-        animals.shift();
-      }else{
-        animals.splice(id, 1);
-      }
+      questions.splice(animals[id],0,animals[id]);
+      animals.splice(id, 1);
       addAllBtns(); 
-      
-
+      displayInTheBox();
     }
 
     async function displayInTheBox(){
@@ -81,11 +74,11 @@
       }
       let imgContainer = document.getElementById("img_container");
       imgContainer.innerHTML = "";
-
       for(let question of questions){
         let div = document.createElement("div");
         div.className = "card";
         let innerHtml = `
+
          
         <img src="http://localhost:8080/questions/${question.id}/image" alt="question" style="width:100%">
         <div class="container">
@@ -105,30 +98,24 @@
      
             `;
             div.innerHTML = innerHtml;
-            div.id = "animal"+question.id;
+            div.id = question.id;
             imgContainer.appendChild(div);
-            div.setAttribute("onclick", "add("+((question.id)-1)+")");
+            div.setAttribute("onclick", "add("+((question.id-1))+")");
       }
 
     }
 
 
     async function addAllBtns() {
-    document.getElementById("tempCards").innerHTML = ""; 
+      document.getElementById("tempCards").innerHTML = ""; 
 
-    animalIds = []; 
-
-    for (let animal of animals) {
-        if (!animalIds.includes(animal.id)) {
-            animalIds.push(animal.id); 
-
-            console.log(animal.id);
-            let _button = document.createElement("button");
-            _button.innerHTML = document.getElementById("animal" + animal.id).innerHTML;
-            _button.setAttribute("onclick", "remove(" + animal.id + ")");
-            document.getElementById("tempCards").appendChild(_button);
-        }
-    }
+      for (let animal of animals) {
+              let _button = document.createElement("button");
+              _button.innerHTML = document.getElementById(animal.id).innerHTML;
+              _button.setAttribute("onclick", "remove(" + animal.id + ")");
+              document.getElementById("tempCards").appendChild(_button);
+      }
+    displayInTheBox();
 }
 
   </script>
