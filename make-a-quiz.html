@@ -28,22 +28,24 @@
       </div>
       <br>
       <div id="img_container" class="cards"></div>
-
     </div>
 
     <div id="list"class="quiz">
-      <label id="newQuiz"></label>
+      <b><span id="newQuiz"></span></b>
+      <label>Quiz</label>
       <div id="tempCards"></div>
     </div>
 
    
   </body>
   <script>
-    let host = "http://localhost:8080"
-    let button = document.getElementById("animal");
-    let animals = [];
+    let host = "http://localhost:8080";
     let questions = [];
+    let animals = [];
     displayInTheBox();
+    questionCounter();
+
+
 
 
 
@@ -53,23 +55,55 @@
       return result;
     }
     async function add(id){
-      animals.push(questions[id]);
-      console.log(animals);
-      console.log(questions);
-      questions.splice(id, 1);
-      addAllBtns();
+      
+      for(let question of questions){
+        if(question.id == id){
+          animals.push(question);
+          const index = questions.findIndex(obj => obj.id === question.id);
+
+          if (index !== -1) {
+            questions.splice(index, 1); // Remove 1 element at the found index
+            console.log("Object removed:", questions);
+          } else {
+            console.log("Object with id", question.id, "not found");
+          }
+        }
+      }
+      questionCounter();
       displayInTheBox();
+      displayInTheSide();
     }
 
     async function remove(id){
-      questions.splice(animals[id],0,animals[id]);
-      animals.splice(id, 1);
-      addAllBtns(); 
+      for(let animal of animals){
+        if(animal.id == id){
+          questions.push(animal);
+          sortArray(questions);
+
+          const index = animals.findIndex(obj => obj.id === animal.id);
+
+          if (index !== -1) {
+            animals.splice(index, 1); // Remove 1 element at the found index
+            console.log("Object removed:", animals);
+          } else {
+            console.log("Object with id", animal.id, "not found");
+          }        
+        }
+      }
+      console.log(animals);
+      console.log(questions);
+      questionCounter();
       displayInTheBox();
+      displayInTheSide();
+    }
+
+    async function sortArray(questions){
+      questions.sort((a, b) => a.id - b.id); 
+      console.log(questions);
     }
 
     async function displayInTheBox(){
-      if(questions.length == 0){
+      if(questions.length == 0 && animals.length == 0){
         questions = await getAll();
       }
       let imgContainer = document.getElementById("img_container");
@@ -100,23 +134,51 @@
             div.innerHTML = innerHtml;
             div.id = question.id;
             imgContainer.appendChild(div);
-            div.setAttribute("onclick", "add("+((question.id-1))+")");
+            div.setAttribute("onclick","add("+question.id+")");
       }
+    }
 
+    async function questionCounter(){
+      let qCount = document.getElementById("newQuiz");
+      qCount.innerText = "The new quiz ("+animals.length+" questions)";
     }
 
 
-    async function addAllBtns() {
-      document.getElementById("tempCards").innerHTML = ""; 
+    async function displayInTheSide(){
 
-      for (let animal of animals) {
-              let _button = document.createElement("button");
-              _button.innerHTML = document.getElementById(animal.id).innerHTML;
-              _button.setAttribute("onclick", "remove(" + animal.id + ")");
-              document.getElementById("tempCards").appendChild(_button);
+      let sideContainer = document.getElementById("tempCards");
+      sideContainer.innerHTML = "";
+      for(let animal of animals){
+        let div = document.createElement("div");
+        div.className = "card";
+        let innerHtml = `
+
+         
+        <img src="http://localhost:8080/questions/${animal.id}/image" alt="question" style="width:100%">
+        <div class="container">
+          <h4><b>${animal.id}</b></h4> 
+          <p>${animal.description}</p>
+          <form>
+              <input type="radio" id="q${animal.id}ptionA" name="q2Answer" value="A">
+              <label for="q${animal.id}ptionA">${animal.choices[0]}</label><br>
+
+              <input type="radio" id="q${animal.id}ptionB" name="q2Answer" value="B">
+              <label for="q${animal.id}ptionB">${animal.choices[1]}</label><br>
+
+              <input type="radio" id="q${animal.id}ptionC" name="q2Answer" value="C">
+              <label for="q${animal.id}ptionC">${animal.choices[2]}</label><br>       
+          </form> 
+        </div>
+     
+            `;
+            div.innerHTML = innerHtml;
+            div.id = animal.id;
+            sideContainer.appendChild(div);
+            div.setAttribute("onclick","remove("+animal.id+")");
+
       }
-    displayInTheBox();
-}
+
+    }
 
   </script>
 </html>
