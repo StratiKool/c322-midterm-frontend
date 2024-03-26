@@ -31,8 +31,16 @@
     </div>
 
     <div id="list"class="quiz">
-      <b><span id="newQuiz"></span></b>
-      <label>Quiz</label>
+      <b><h3 id="newQuiz"></h3></b>
+      <br>
+      <label for="title">Quiz title: </label><input id="title" type="text" >
+      <br><br>
+      <button id="savedChanges" onclick="saveYourWork()">Save your changes</button>
+      <br><br>
+      <button id="savedAndNew" onclick="savedAndStartANewOne()">Save this quiz and start a new one</button>
+      <br><br>
+      <b><p>If you want to remove a question from the quiz, you can click on the question here and it will be removed from the quiz.</p></b>
+      <br><br>
       <div id="tempCards"></div>
     </div>
 
@@ -42,12 +50,9 @@
     let host = "http://localhost:8080";
     let questions = [];
     let animals = [];
+    let allInfos = [];
     displayInTheBox();
     questionCounter();
-
-
-
-
 
     async function getAll() {
       let response = await fetch(host + "/questions");
@@ -95,6 +100,119 @@
       questionCounter();
       displayInTheBox();
       displayInTheSide();
+    }
+
+    let count = 0;
+
+    async function saveYourWork(){
+        let id = 0;
+        if(allInfos.length == 0){
+            allInfos = await getAllQuizzes();
+          }
+        if(count == 0){
+          count++;
+          let title1 = document.getElementById("title").value;
+          let idArr = [];
+          for(let animal of animals){
+            idArr.push(animal.id);
+          }
+          let temp = -1;
+          for(let i = 0; i < idArr.length; i++){
+            for(let j = i; j < idArr.length; j++){
+              if(idArr[i] > idArr[j]){
+                temp = idArr[i];
+                idArr[i] = idArr[j];
+                idArr[j] = temp;
+              }
+            }
+          }
+        let quiz = {title: title1, questionIds: idArr };
+        alert("You entered: " +JSON.stringify(quiz));
+        let request = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(quiz)
+        };
+        let response = await fetch(host + "/quizzes", request);
+      }else {
+        let newTitle = document.getElementById("title").value;
+        let newIdArr = [];
+          for(let animal of animals){
+            newIdArr.push(animal.id);
+          }
+          let temp = -1;
+          for(let i = 0; i < newIdArr.length; i++){
+            for(let j = i; j < newIdArr.length; j++){
+              if(newIdArr[i] > newIdArr[j]){
+                temp = newIdArr[i];
+                newIdArr[i] = newIdArr[j];
+                newIdArr[j] = temp;
+              }
+            }
+          }
+
+          id = allInfos[allInfos.length-1].id;
+
+
+          quiz = {title: newTitle, questionIds: newIdArr };
+          alert("You entered: " +JSON.stringify(quiz));
+          let request = {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(quiz)
+          };
+          let response = await fetch(host + "/quizzes/" + id, request);
+      }
+    }
+
+    async function getAllQuizzes(){
+      let request = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        },
+      };
+      let response = await fetch(host + "/quizzes", request);
+      if(response.status == 200){
+        let result = await response.json();
+        return result;
+      }else{
+        alert("Something went wrong in the backend!");
+      }
+    }
+
+    async function savedAndStartANewOne(){
+      count = 0;
+      let title1 = document.getElementById("title").value;
+      let idArr = [];
+      for(let animal of animals){
+        idArr.push(animal.id);
+      }
+      let temp = -1;
+      for(let i = 0; i < idArr.length; i++){
+        for(let j = i; j < idArr.length; j++){
+          if(idArr[i] > idArr[j]){
+            temp = idArr[i];
+            idArr[i] = idArr[j];
+            idArr[j] = temp;
+          }
+        }
+      }
+      let quiz = {title: title1, questionIds: idArr };
+      alert("You entered: " +JSON.stringify(quiz));
+      let request = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(quiz)
+      };
+      let response = await fetch(host + "/quizzes", request);
+      window.location.reload()
     }
 
     async function sortArray(questions){
