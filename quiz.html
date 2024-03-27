@@ -8,11 +8,16 @@
   <link rel="stylesheet" href="quiz.css">
 </head>
 <body>
-  <div id="q_container" class="cards">
-  </div>
-  <div id="buttons">
-    <button id="togglee" onclick="subtractCount()" visibility="hidden">Previous</button>
-    <button onclick="addCount()">Next</button>
+  
+    <div id="q_container" class="bit_smaller">
+    </div>
+  <div class="makingItLookGood"></div>
+    <div id="buttons" class="buttonPresser">
+      <button id="togglee" onclick="subtractCount()">Previous</button>
+    </div>
+      <div id="question-counter" class="buttonPresser"></div>
+      <div class="buttonPresser"><button onclick="addCount()">Next</button></div>
+    </div>
   </div>
 </body>
 <script>
@@ -74,24 +79,19 @@
               div.innerHTML = innerHtml;
               div.id = quizzes.questions[count].id;
               imgContainer.appendChild(div);
-              // if(count < quizzes.questions.length+1){
-              //   let btnContainer = document.getElementById("buttons");
-              //   var _buttoon = document.createElement("button");
-              //   _buttoon.id = 'next_btn';
-              //   _buttoon.innerText = "Next";
-              //   btnContainer.appendChild(_buttoon);
-              //   console.log("before function");
-              //   _buttoon.setAttribute("onclick","addCount("+count+")");
-              // }
 
-              // if(count > 0){
-              //   let btnContainer = document.getElementById("buttons");
-              //   var _button = document.createElement("button");
-              //   _button.id = 'prev_btn';
-              //   _button.innerText = "Previous";
-              //   btnContainer.appendChild(_button);
-              //   _button.setAttribute("onclick","subtractCount("+count+")");
-              // }
+              let lab = document.getElementById("question-counter");
+              lab.innerHTML = "";
+
+              let anotherdiv = document.createElement("div");             
+              let innerHTml = `
+
+              <label> Question ${count+1} of ${quizzes.questions.length}</label>
+              `;
+              anotherdiv.innerHTML = innerHTml;
+              anotherdiv.id = count;
+              lab.appendChild(anotherdiv);
+              
     }
 
     function subtractCount(){
