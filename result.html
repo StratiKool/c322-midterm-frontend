@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="navbar.css">
+    <link rel="stylesheet" href="take-quiz-cards.css">
+  </head>
+
+  <body>
+    <ul class="topnav">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="add-question.html">Add questions</a></li>
+      <li><a href="make-a-quiz.html">Create a quiz</a></li>
+      <li><a class="active" href="take-a-quiz.html">Take a quiz</a></li>
+      <li class="right"><a href="#about">About</a></li>
+    </ul>
+    <br>
+    <div id="textBox" class="cards"></div>
+    <h2 class="cards">You scored a 3 out of 4.</h2>
+
+  </body>
+  <script>
+    let host = "https://take-a-quiz.onrender.com";
+    let id = new URLSearchParams(window.location.search).get("id");
+    let quizzes = [];
+    showQuestions();
+
+      async function getAllQuizzes(){
+        let request = {
+            method: "GET",
+            headers: {
+            "Content-Type": "application/json"
+            },
+        };
+        let response = await fetch(host + "/quizzes/"+id, request);
+        if(response.status == 200){
+            let result = await response.json();
+            return result;
+        }else{
+            alert("Something went wrong in the backend!");
+        }
+    }
+
+    async function showQuestions(){
+      if(quizzes == 0){
+        quizzes = await getAllQuizzes();
+      }
+      let imgContainer = document.getElementById("textBox");
+
+          let div = document.createElement("div");
+          div.className = "text";
+          let innerHtml = `
+
+          <h2>You completed the quiz ${quizzes.title}</h2>
+      
+              `;
+              div.innerHTML = innerHtml;
+              div.id = quizzes.id;
+              imgContainer.appendChild(div);
+    }
+
+
+  </script>
+  </html>

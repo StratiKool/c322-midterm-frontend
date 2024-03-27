@@ -4,8 +4,114 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <link rel="stylesheet" href="make-a-quiz.css">
+  <link rel="stylesheet" href="quiz.css">
 </head>
 <body>
-  
+  <div id="q_container" class="cards">
+  </div>
+  <div id="buttons">
+    <button id="togglee" onclick="subtractCount()" visibility="hidden">Previous</button>
+    <button onclick="addCount()">Next</button>
+  </div>
 </body>
+<script>
+  let host = "https://take-a-quiz.onrender.com";
+  let id = new URLSearchParams(window.location.search).get("id");
+  let quizzes = [];
+  let count = 0;
+  showQuestions();
+
+
+  async function getAllQuizzes(){
+      let request = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        },
+      };
+      let response = await fetch(host + "/quizzes/"+id, request);
+      if(response.status == 200){
+        let result = await response.json();
+        return result;
+      }else{
+        alert("Something went wrong in the backend!");
+      }
+    }
+
+
+    async function showQuestions(){
+      if(quizzes == 0){
+        quizzes = await getAllQuizzes();
+      }
+
+      let imgContainer = document.getElementById("q_container");
+        imgContainer.innerHTML = "";
+
+          let div = document.createElement("div");
+          div.className = "card";
+          let innerHtml = `
+
+          
+          <img src="http://localhost:8080/questions/${quizzes.questions[count].id}/image" alt="question" style="width:100%">
+          <div class="container">
+            <h4><b>${quizzes.questions[count].id}</b></h4> 
+            <p>${quizzes.questions[count].description}</p>
+            <form>
+                <input type="radio" id="q${quizzes.questions[count].id}ptionA" name="q2Answer" value="A">
+                <label for="q${quizzes.questions[count].id}ptionA">${quizzes.questions[count].choices[0]}</label><br>
+
+                <input type="radio" id="q${quizzes.questions[count].id}ptionB" name="q2Answer" value="B">
+                <label for="q${quizzes.questions[count].id}ptionB">${quizzes.questions[count].choices[1]}</label><br>
+
+                <input type="radio" id="q${quizzes.questions[count].id}ptionC" name="q2Answer" value="C">
+                <label for="q${quizzes.questions[count].id}ptionC">${quizzes.questions[count].choices[2]}</label><br>       
+            </form> 
+          </div>
+          <br>
+      
+              `;
+              div.innerHTML = innerHtml;
+              div.id = quizzes.questions[count].id;
+              imgContainer.appendChild(div);
+              // if(count < quizzes.questions.length+1){
+              //   let btnContainer = document.getElementById("buttons");
+              //   var _buttoon = document.createElement("button");
+              //   _buttoon.id = 'next_btn';
+              //   _buttoon.innerText = "Next";
+              //   btnContainer.appendChild(_buttoon);
+              //   console.log("before function");
+              //   _buttoon.setAttribute("onclick","addCount("+count+")");
+              // }
+
+              // if(count > 0){
+              //   let btnContainer = document.getElementById("buttons");
+              //   var _button = document.createElement("button");
+              //   _button.id = 'prev_btn';
+              //   _button.innerText = "Previous";
+              //   btnContainer.appendChild(_button);
+              //   _button.setAttribute("onclick","subtractCount("+count+")");
+              // }
+    }
+
+    function subtractCount(){
+      if(count != 0){
+        count--;        
+      }
+
+      showQuestions();
+    }
+
+    function addCount(){
+      if(count == quizzes.questions.length-1){
+        goToResults();
+      }
+      count++;
+      showQuestions();
+    }
+
+    function goToResults(){
+      location.href = 'result.html?id='+id;
+    }
+</script>
 </html>

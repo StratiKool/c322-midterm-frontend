@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <link rel="stylesheet" href="navbar.css">
+    <link rel="stylesheet" href="take-quiz-cards.css">
   </head>
 
   <body>
@@ -15,7 +16,64 @@
       <li><a class="active" href="take-a-quiz.html">Take a quiz</a></li>
       <li class="right"><a href="#about">About</a></li>
     </ul>
+    <h2>Here are the list of all available quizzes. Click on a quiz to start taking the quiz.</h2>
+    <br>
+    <div id="cards" class="cards"></div>
 
    
   </body>
+  <script>
+    let host = "https://take-a-quiz.onrender.com";
+    let id = 0;
+    let quizzes = [];
+    quizShower();
+
+    async function quizShower(){
+      if(quizzes.length == 0){
+        quizzes = await getAllQuizzes();
+      }
+
+      let quizContainer = document.getElementById("cards");
+      quizContainer.innerHTML ="";
+      for(let quiz of quizzes){
+        let div = document.createElement("div");
+        div.className = "card";
+        let innerHtml = `
+        
+        <b><label>${quiz.id}</label></b>
+        <br><br>
+        <label>${quiz.title}</label>
+        <br><br>
+        <label>(${quiz.questionIds.length} questions)</label>
+
+        `;
+        div.innerHTML = innerHtml;
+        div.id = quiz.id;
+        quizContainer.appendChild(div);
+        div.setAttribute("onclick","goToQuiz("+div.id+")");
+      }
+    }
+
+    async function goToQuiz(quizID){
+      id = quizID;
+      location.href = 'quiz.html?id=' + id;
+    }
+
+    async function getAllQuizzes(){
+      let request = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        },
+      };
+      let response = await fetch(host + "/quizzes", request);
+      if(response.status == 200){
+        let result = await response.json();
+        return result;
+      }else{
+        alert("Something went wrong in the backend!");
+      }
+    }
+
+  </script>
 </html>

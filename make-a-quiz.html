@@ -35,9 +35,9 @@
       <br>
       <label for="title">Quiz title: </label><input id="title" type="text" >
       <br><br>
-      <button id="savedChanges" onclick="saveYourWork()">Save your changes</button>
+      <button id="savedChanges" onclick="addQuiz(false)">Save your changes</button>
       <br><br>
-      <button id="savedAndNew" onclick="savedAndStartANewOne()">Save this quiz and start a new one</button>
+      <button id="savedAndNew" onclick="addQuiz(true)">Save this quiz and start a new one</button>
       <br><br>
       <b><p>If you want to remove a question from the quiz, you can click on the question here and it will be removed from the quiz.</p></b>
       <br><br>
@@ -47,7 +47,7 @@
    
   </body>
   <script>
-    let host = "http://localhost:8080";
+    let host = "https://take-a-quiz.onrender.com";
     let questions = [];
     let animals = [];
     let allInfos = [];
@@ -60,7 +60,7 @@
       return result;
     }
     async function add(id){
-      
+
       for(let question of questions){
         if(question.id == id){
           animals.push(question);
@@ -102,73 +102,54 @@
       displayInTheSide();
     }
 
-    let count = 0;
-
-    async function saveYourWork(){
-        let id = 0;
-        if(allInfos.length == 0){
-            allInfos = await getAllQuizzes();
+    let id = null;
+    async function addQuiz(startNewAfterSave) {
+      let url = host + "/quizzes" + (id ? `/${id}` : "");
+      console.log(url);
+      let method = id ? "PUT" : "POST";
+      let title1 = document.getElementById("title").value;
+      let idArr = [];
+      for(let animal of animals){
+        idArr.push(animal.id);
+      }
+      let temp = -1;
+      for(let i = 0; i < idArr.length; i++){
+        for(let j = i; j < idArr.length; j++){
+          if(idArr[i] > idArr[j]){
+            temp = idArr[i];
+            idArr[i] = idArr[j];
+            idArr[j] = temp;
           }
-        if(count == 0){
-          count++;
-          let title1 = document.getElementById("title").value;
-          let idArr = [];
-          for(let animal of animals){
-            idArr.push(animal.id);
-          }
-          let temp = -1;
-          for(let i = 0; i < idArr.length; i++){
-            for(let j = i; j < idArr.length; j++){
-              if(idArr[i] > idArr[j]){
-                temp = idArr[i];
-                idArr[i] = idArr[j];
-                idArr[j] = temp;
-              }
-            }
-          }
-        let quiz = {title: title1, questionIds: idArr };
-        alert("You entered: " +JSON.stringify(quiz));
-        let request = {
-          method: "POST",
+        }
+      }
+      let body = JSON.stringify({
+        title: title1,
+        questionIds: idArr,
+      });
+ 
+      try {
+        let response = await fetch(url, {
+          method: method,
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(quiz)
-        };
-        let response = await fetch(host + "/quizzes", request);
-      }else {
-        let newTitle = document.getElementById("title").value;
-        let newIdArr = [];
-          for(let animal of animals){
-            newIdArr.push(animal.id);
-          }
-          let temp = -1;
-          for(let i = 0; i < newIdArr.length; i++){
-            for(let j = i; j < newIdArr.length; j++){
-              if(newIdArr[i] > newIdArr[j]){
-                temp = newIdArr[i];
-                newIdArr[i] = newIdArr[j];
-                newIdArr[j] = temp;
-              }
-            }
-          }
-
-          id = allInfos[allInfos.length-1].id;
-
-
-          quiz = {title: newTitle, questionIds: newIdArr };
-          alert("You entered: " +JSON.stringify(quiz));
-          let request = {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(quiz)
-          };
-          let response = await fetch(host + "/quizzes/" + id, request);
+          body: body,
+        });
+ 
+        let data = await response.json();
+ 
+        if (!id) {
+          id = data;
+        }
+ 
+        if (startNewAfterSave) {
+          location.reload();
+        }
+      } catch (error) {
+        console.error("add new quiz failed:", error);
       }
     }
-
+    
     async function getAllQuizzes(){
       let request = {
         method: "GET",
@@ -185,39 +166,8 @@
       }
     }
 
-    async function savedAndStartANewOne(){
-      count = 0;
-      let title1 = document.getElementById("title").value;
-      let idArr = [];
-      for(let animal of animals){
-        idArr.push(animal.id);
-      }
-      let temp = -1;
-      for(let i = 0; i < idArr.length; i++){
-        for(let j = i; j < idArr.length; j++){
-          if(idArr[i] > idArr[j]){
-            temp = idArr[i];
-            idArr[i] = idArr[j];
-            idArr[j] = temp;
-          }
-        }
-      }
-      let quiz = {title: title1, questionIds: idArr };
-      alert("You entered: " +JSON.stringify(quiz));
-      let request = {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(quiz)
-      };
-      let response = await fetch(host + "/quizzes", request);
-      window.location.reload()
-    }
-
     async function sortArray(questions){
       questions.sort((a, b) => a.id - b.id); 
-      console.log(questions);
     }
 
     async function displayInTheBox(){
@@ -232,7 +182,7 @@
         let innerHtml = `
 
          
-        <img src="http://localhost:8080/questions/${question.id}/image" alt="question" style="width:100%">
+        <img src="https://take-a-quiz.onrender.com/questions/${question.id}/image" alt="question" style="width:100%">
         <div class="container">
           <h4><b>${question.id}</b></h4> 
           <p>${question.description}</p>
@@ -272,7 +222,7 @@
         let innerHtml = `
 
          
-        <img src="http://localhost:8080/questions/${animal.id}/image" alt="question" style="width:100%">
+        <img src="https://take-a-quiz.onrender.com/questions/${animal.id}/image" alt="question" style="width:100%">
         <div class="container">
           <h4><b>${animal.id}</b></h4> 
           <p>${animal.description}</p>
